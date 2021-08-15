@@ -151,6 +151,40 @@ void liner(std::string token) {
             } else {
                 std::cout << "What do you want to create? group/chat/invite are accepted." << std::endl;
             }
+        } else if(line.rfind(".delete", 0) == 0) {
+            if(line.rfind("group", 8) == 8) {
+                cpr::Response deletingGroup = cpr::Delete(cpr::Url{domain + "/group/" + group},
+                                                        cpr::Header{{"Authorization", token}},
+                                                                    cpr::VerifySsl{false});
+                auto deletingGroupJson = nlohmann::json::parse(deletingGroup.text);
+                if(deletingGroupJson["success"]) {
+                    group = "";
+                    chat = "";
+                    groupName = "";
+                    chatName = "";
+                    std::cout << "Group deleted." << std::endl;
+                } else {
+                    std::cout << "Something went wrong." << std::endl;
+                }
+            } else if(line.rfind("chat", 8) == 8) {
+                if(!group.empty()) {
+                    cpr::Response deletingChat = cpr::Post(cpr::Url{domain + "/group/" + group + "/chat/" + chat},
+                                                           cpr::Header{{"Authorization", token}},
+                                                                       cpr::VerifySsl{false});
+                    auto deletingChatJson = nlohmann::json::parse(deletingChat.text);
+                    if(deletingChatJson["success"]) {
+                        chat = "";
+                        chatName = "";
+                        std::cout << "Chat delete." << std::endl;
+                    } else {
+                        std::cout << "Something went wrong." << std::endl;
+                    }
+                } else {
+                    std::cout << "Get into a group using .group." << std::endl;
+                }
+            } else {
+                std::cout << "What do you want to delete? group/chat are accepted." << std::endl;
+            }
         } else if(line.rfind(".join", 0) == 0) {
             std::string inviteCode = line.substr(6);
             cpr::Response joiningGroup = cpr::Post(cpr::Url{domain + "/invite/join/" + inviteCode},
