@@ -7,8 +7,10 @@
 #include <unordered_map>
 #include <vector>
 
-namespace SimpleWeb {
-  enum class StatusCode {
+namespace SimpleWeb
+{
+enum class StatusCode
+{
     unknown = 0,
     information_continue = 100,
     information_switching_protocols,
@@ -71,9 +73,10 @@ namespace SimpleWeb {
     server_error_loop_detected,
     server_error_not_extended = 510,
     server_error_network_authentication_required
-  };
+};
 
-  inline const std::map<StatusCode, std::string> &status_code_strings() {
+inline const std::map<StatusCode, std::string> &status_code_strings()
+{
     static const std::map<StatusCode, std::string> status_code_strings = {
         {StatusCode::unknown, ""},
         {StatusCode::information_continue, "100 Continue"},
@@ -138,39 +141,44 @@ namespace SimpleWeb {
         {StatusCode::server_error_not_extended, "510 Not Extended"},
         {StatusCode::server_error_network_authentication_required, "511 Network Authentication Required"}};
     return status_code_strings;
-  }
+}
 
-  inline StatusCode status_code(const std::string &status_code_string) noexcept {
-    if(status_code_string.size() < 3)
-      return StatusCode::unknown;
+inline StatusCode status_code(const std::string &status_code_string) noexcept
+{
+    if (status_code_string.size() < 3)
+        return StatusCode::unknown;
 
     auto number = status_code_string.substr(0, 3);
-    if(number[0] < '0' || number[0] > '9' || number[1] < '0' || number[1] > '9' || number[2] < '0' || number[2] > '9')
-      return StatusCode::unknown;
+    if (number[0] < '0' || number[0] > '9' || number[1] < '0' || number[1] > '9' || number[2] < '0' || number[2] > '9')
+        return StatusCode::unknown;
 
-    class StringToStatusCode : public std::unordered_map<std::string, SimpleWeb::StatusCode> {
+    class StringToStatusCode : public std::unordered_map<std::string, SimpleWeb::StatusCode>
+    {
     public:
-      StringToStatusCode() {
-        for(auto &status_code : status_code_strings())
-          emplace(status_code.second.substr(0, 3), status_code.first);
-      }
+        StringToStatusCode()
+        {
+            for (auto &status_code : status_code_strings())
+                emplace(status_code.second.substr(0, 3), status_code.first);
+        }
     };
     static StringToStatusCode string_to_status_code;
 
     auto pos = string_to_status_code.find(number);
-    if(pos == string_to_status_code.end())
-      return static_cast<StatusCode>(atoi(number.c_str()));
+    if (pos == string_to_status_code.end())
+        return static_cast<StatusCode>(atoi(number.c_str()));
     return pos->second;
-  }
+}
 
-  inline const std::string &status_code(StatusCode status_code_enum) noexcept {
+inline const std::string &status_code(StatusCode status_code_enum) noexcept
+{
     auto pos = status_code_strings().find(status_code_enum);
-    if(pos == status_code_strings().end()) {
-      static std::string empty_string;
-      return empty_string;
+    if (pos == status_code_strings().end())
+    {
+        static std::string empty_string;
+        return empty_string;
     }
     return pos->second;
-  }
+}
 } // namespace SimpleWeb
 
 #endif // SIMPLE_WEB_STATUS_CODE_HPP
